@@ -1,6 +1,8 @@
 # MY_COMPANY
 
-SaaS/IT スタートアップを運営するための **AI 経営チーム** プロジェクトです。Claude Code のサブエージェント機能を活用し、CEO・CFO・CTO などの経営層から、営業・マーケ・開発・管理部門まで、計14名の専門エージェントを実装しています。
+SaaS/IT スタートアップを運営するための **AI 経営チーム** プロジェクトです。Claude Code のサブエージェント機能を活用し、CEO・CFO・CTO などの経営層から、企画・営業・マーケ・開発・管理部門まで、**計18名の専門エージェント** を実装しています。
+
+**目玉機能: 商材企画ワークフロー** — 「新商材を企画して」と依頼すると、企画部4名が起案 → 経営層4名がレビュー → 承認された案だけがあなたに届きます（生煮え案は非開示）。
 
 ## クイックスタート
 
@@ -27,6 +29,9 @@ Claude Code はリポジトリ内の `.claude/agents/` を自動で読み込み�
 @cfo ARRが3億円・成長率150%の場合、シリーズBで狙うべきバリュエーションは？
 
 @product-manager リテンション率を上げる新機能のPRDを書いて。
+
+新商材を企画して                ← 企画部→経営層レビューが裏で走り、
+                                   承認済み案だけが返ってくる
 ```
 
 ## チーム構成
@@ -34,6 +39,7 @@ Claude Code はリポジトリ内の `.claude/agents/` を自動で読み込み�
 | 部門 | エージェント |
 |------|--------------|
 | 経営層 | `ceo`, `coo`, `cfo`, `cto` |
+| 企画部 | `planning-lead`, `market-research`, `business-development`, `product-planning` |
 | 営業・マーケティング | `sales-lead`, `marketing-lead`, `customer-success` |
 | 開発・エンジニアリング | `engineering-manager`, `product-manager`, `ux-designer`, `qa-engineer` |
 | 管理部門 | `hr-lead`, `accounting-lead`, `legal-lead` |
@@ -43,6 +49,23 @@ Claude Code はリポジトリ内の `.claude/agents/` を自動で読み込み�
 ## カスタマイズ
 
 各エージェントの定義は `.claude/agents/<name>.md` にあります。フェーズ・業種・カルチャーに合わせて自由に編集してください。
+
+## サンプル実装: 同人税務サバイバルキット
+
+`/web` 配下に、AI経営チームが企画し、承認した商材のサンプル実装があります。
+
+- **商材**: 副業同人作家向け確定申告サポートツール（4機能）
+- **技術**: Next.js 16 + React 19 + TailwindCSS 4 + TypeScript（静的エクスポート）
+- **特徴**: バックエンドゼロ、入力データはブラウザ内完結（サーバ送信なし）
+
+```bash
+cd web
+npm install
+npm run dev   # ローカル起動 http://localhost:3000
+npm run build # 静的サイト生成 (out/ に出力)
+```
+
+Vercel / Netlify / GitHub Pages 等の静的ホスティングに無料デプロイ可能です。
 
 ## ライセンス
 
