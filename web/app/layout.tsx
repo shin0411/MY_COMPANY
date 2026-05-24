@@ -31,6 +31,15 @@ export const metadata: Metadata = {
     description: "副業同人作家のための無料確定申告サポートツール。仕訳・所得税概算・Q&A・経費チェックリスト。",
     type: "website",
     locale: "ja_JP",
+    images: [
+      { url: "og.png", width: 1200, height: 630, alt: "同人税務サバイバルキット 2026" },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "同人税務サバイバルキット 2026",
+    description: "副業同人作家のための無料確定申告サポート。仕訳・所得税概算・Q&A・チェックリスト。",
+    images: ["og.png"],
   },
 };
 
