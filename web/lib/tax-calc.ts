@@ -9,6 +9,7 @@ export type TaxInput = {
   basicDeduction: number;
   otherIncome: number;
   hasSideJob: boolean;
+  applyBusinessTax: boolean;
 };
 
 export type TaxResult = {
@@ -18,6 +19,7 @@ export type TaxResult = {
   incomeTax: number;
   reconstructionTax: number;
   residentTax: number;
+  residentEqualShare: number;
   businessTax: number;
   totalTax: number;
   effectiveRate: number;
@@ -45,6 +47,9 @@ function calcIncomeTax(taxable: number): number {
   return 0;
 }
 
+const RESIDENT_DEDUCTION_DIFF = 50_000;
+const RESIDENT_EQUAL_SHARE_JPY = 5_000;
+
 export function calcTax(input: TaxInput): TaxResult {
   const warnings: string[] = [];
 
@@ -62,40 +67,49 @@ export function calcTax(input: TaxInput): TaxResult {
   const taxableForCalc = Math.floor(taxableIncome / 1000) * 1000;
 
   const incomeTax = calcIncomeTax(taxableForCalc);
-  const reconstructionTax = Math.floor((incomeTax * 0.021) / 100) * 100;
+  const reconstructionTax = Math.floor(incomeTax * 0.021);
 
-  const residentTaxableIncome = Math.max(0, netIncome + input.otherIncome - (deductionSum - 50_000));
+  const residentTaxableRaw = Math.max(0, netIncome + input.otherIncome - (deductionSum - RESIDENT_DEDUCTION_DIFF));
+  const residentTaxableIncome = Math.floor(residentTaxableRaw / 1000) * 1000;
   const residentTax = Math.floor((residentTaxableIncome * 0.10) / 100) * 100;
+  const residentEqualShare = residentTaxableIncome > 0 ? RESIDENT_EQUAL_SHARE_JPY : 0;
 
   const businessTaxBase = Math.max(0, netIncome - 2_900_000);
-  const businessTax = Math.floor((businessTaxBase * 0.05) / 100) * 100;
+  const businessTax = input.applyBusinessTax
+    ? Math.floor((businessTaxBase * 0.05) / 100) * 100
+    : 0;
 
-  const totalTax = incomeTax + reconstructionTax + residentTax + businessTax;
+  const totalTax = incomeTax + reconstructionTax + residentTax + residentEqualShare + businessTax;
   const effectiveRate = input.income > 0 ? totalTax / input.income : 0;
 
-  if (input.income > 0 && input.income < 200_000 && !input.hasSideJob) {
+  if (input.income > 0 && netIncome < 480_000 && !input.hasSideJob) {
     warnings.push(
-      "本業収入がなく同人収入が20万円未満なら、所得税の確定申告は原則不要です（住民税は別途必要な場合あり）。"
+      "専業（給与所得なし）の場合、所得が基礎控除等の合計を下回れば所得税は0円ですが、住民税申告や国民健康保険料の関係で申告した方が有利な場合があります。"
     );
   }
-  if (input.hasSideJob && input.income > 0 && grossProfit > 200_000) {
+  if (input.hasSideJob && input.income > 0 && netIncome > 200_000) {
     warnings.push(
-      "副業の所得が20万円超なので、所得税の確定申告が必要です。本業の源泉徴収票と合わせて申告してください。"
+      "副業の所得（経費・青色控除後）が20万円超なので、所得税の確定申告が必要です。本業の源泉徴収票と合わせて申告してください。"
     );
   }
-  if (input.hasSideJob && grossProfit > 0 && grossProfit <= 200_000) {
+  if (input.hasSideJob && netIncome > 0 && netIncome <= 200_000) {
     warnings.push(
-      "副業の所得が20万円以下なので所得税の確定申告は原則不要ですが、住民税の申告は別途必要です。"
+      "副業の所得（経費・青色控除後）が20万円以下のため、給与の年末調整が済んでいれば所得税の確定申告は原則不要です。ただし住民税申告は別途必要、医療費控除等の還付申告をする場合はすべての所得を申告する必要があります。"
     );
   }
   if (input.blueDeduction > 0 && input.income < 500_000) {
     warnings.push(
-      "売上規模が小さい場合、青色申告承認申請の手間に対して節税額が見合わないこともあります。"
+      "売上規模が小さい場合、青色申告の事務負担に対して節税額が見合わないこともあります。10万円控除なら簡易帳簿で済みます。"
     );
   }
   if (input.income > 10_000_000) {
     warnings.push(
-      "売上1,000万円超は翌々年から消費税課税事業者の判定対象です。インボイス制度も含めて要検討。"
+      "課税売上1,000万円超の場合、2年後から消費税の課税事業者となります。インボイス制度・2割特例等もあわせて要検討。"
+    );
+  }
+  if (input.applyBusinessTax && businessTax > 0) {
+    warnings.push(
+      "同人作家の創作活動は地方税法上「文芸業」として個人事業税が非課税となる解釈もあります。所轄の都道府県税事務所に確認してください。"
     );
   }
 
@@ -108,22 +122,24 @@ export function calcTax(input: TaxInput): TaxResult {
       : []),
     { label: "事業所得", value: netIncome },
     ...(input.otherIncome > 0 ? [{ label: "その他の所得", value: input.otherIncome }] : []),
-    { label: "所得控除合計", value: -deductionSum },
-    { label: "課税所得", value: taxableIncome },
+    { label: "所得控除合計（所得税）", value: -deductionSum },
+    { label: "課税所得（千円未満切捨）", value: taxableForCalc },
     { label: "所得税（参考値）", value: incomeTax },
     { label: "復興特別所得税（2.1%）", value: reconstructionTax },
-    { label: "住民税（参考値、約10%）", value: residentTax },
-    ...(businessTax > 0 ? [{ label: "個人事業税（5%、290万円超部分）", value: businessTax }] : []),
+    { label: "住民税 所得割（約10%）", value: residentTax, note: "住民税の基礎控除は43万円・他控除も低めに簡易補正" },
+    ...(residentEqualShare > 0 ? [{ label: "住民税 均等割（参考）", value: residentEqualShare, note: "自治体により4,000〜6,000円程度" }] : []),
+    ...(businessTax > 0 ? [{ label: "個人事業税（5%、290万円超部分）", value: businessTax, note: "文芸業として非課税解釈の余地あり" }] : []),
     { label: "税額合計", value: totalTax },
   ];
 
   return {
     grossProfit,
     netIncome,
-    taxableIncome,
+    taxableIncome: taxableForCalc,
     incomeTax,
     reconstructionTax,
     residentTax,
+    residentEqualShare,
     businessTax,
     totalTax,
     effectiveRate,
@@ -143,26 +159,38 @@ export function classifyIncomeType(input: {
 } {
   const { income, hasSideJob, isContinuous, isRecorded } = input;
 
-  if (!hasSideJob && income >= 3_000_000 && isContinuous && isRecorded) {
+  if (!hasSideJob && isContinuous && isRecorded) {
     return {
       classification: "事業所得",
-      reason: "本業として継続的に行い、帳簿を備え、相応の収入規模があるため事業所得と判定される可能性が高い。",
+      reason: "本業として継続的に行い、帳簿を備え付けている場合は原則として事業所得（所得税法27条）。青色申告特別控除や損益通算の対象となる。",
     };
   }
-  if (hasSideJob && income < 3_000_000 && !isRecorded) {
-    return {
-      classification: "雑所得",
-      reason: "副業で帳簿を備えていない場合、国税庁通達により原則として雑所得（業務に係る雑所得）に分類される。",
-    };
-  }
-  if (hasSideJob && income >= 3_000_000 && isContinuous && isRecorded) {
+  if (hasSideJob && isRecorded && isContinuous) {
+    if (income >= 3_000_000) {
+      return {
+        classification: "事業所得",
+        reason: "副業でも収入300万円超かつ帳簿記録ありなら、原則として事業所得（2022年国税庁通達のパブコメ修正後の考え方）。ただし社会通念での個別判定が必要。",
+      };
+    }
     return {
       classification: "事業所得",
-      reason: "副業でも事業性（継続性・帳簿記録・規模）が認められれば事業所得として申告可能。",
+      reason: "副業で収入300万円以下でも、帳簿を備え付けている場合は原則として事業所得（2022年通達のパブコメ修正後の考え方）。ただし社会通念で副業性が強いと判断される場合は雑所得となる余地もある。",
+    };
+  }
+  if (hasSideJob && !isRecorded) {
+    if (income <= 3_000_000) {
+      return {
+        classification: "雑所得",
+        reason: "副業かつ帳簿を備えていない、収入300万円以下なら、2022年通達により原則として「業務に係る雑所得」に分類される。",
+      };
+    }
+    return {
+      classification: "判定要相談",
+      reason: "副業で帳簿なしだが収入300万円超は、事業性の社会通念上の判断が必要。税理士相談を推奨。",
     };
   }
   return {
     classification: "判定要相談",
-    reason: "事業所得 / 雑所得の判定は個別事情に依存するため、税理士に相談してください。",
+    reason: "事業所得 / 雑所得の判定は個別事情（営利性・継続性・反復性・規模・帳簿の有無・社会通念）に依存するため、税理士に相談してください。",
   };
 }

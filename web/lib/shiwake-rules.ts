@@ -85,11 +85,12 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   {
     id: "tool_subscription",
     label: "ツール・サブスク料金",
-    account: "通信費 または 諸会費",
+    account: "通信費 または 支払手数料",
     description:
-      "Photoshop、Clip Studio、Pixiv FANBOX (作家側ではなく利用側)、Adobe CC等。月額/年額契約のクリエイティブツール。",
+      "Photoshop、Clip Studio Paint、Adobe CC等の月額/年額契約のクリエイティブツール。「諸会費」は同業者団体・商工会等の会費に使う科目なのでサブスクには不適切。",
     examples: ["Adobe CC", "Clip Studio Paint", "プロアカウント費用"],
     keywords: ["Adobe", "Photoshop", "Clip Studio", "クリスタ", "サブスク", "月額"],
+    caution: "プライベートでも使う場合は事業利用分の按分が必要。",
   },
   {
     id: "reference_book",
@@ -126,7 +127,16 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
       "税理士へのスポット相談料。事業所得として申告する場合は経費計上可能。",
     examples: ["税理士スポット相談料", "確定申告代行費用"],
     keywords: ["税理士", "相談", "申告代行"],
-    caution: "報酬支払時は源泉徴収（10.21%）が必要なケースあり。",
+    caution: "個人事業主（給与支払事務所届出なし）が支払う場合は原則として源泉徴収義務なし。給与支払のある事業者の場合のみ10.21%（月100万円超部分は20.42%）の源泉徴収が必要。",
+  },
+  {
+    id: "printing_outsource",
+    label: "印刷費（外注工賃で処理する場合）",
+    account: "外注工賃 または 製造原価",
+    description:
+      "青色申告で製造原価科目を使う場合は「外注工賃」、シンプルな運用なら「仕入高」での処理が一般的。同人誌は製造業的な実態に近い。",
+    examples: ["オフセット印刷を外注", "グッズ製造を外注"],
+    keywords: ["外注", "製造", "委託加工"],
   },
 ];
 

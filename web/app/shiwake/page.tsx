@@ -20,18 +20,18 @@ export default function ShiwakePage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <header className="mb-6">
-        <p className="text-pink-600 text-sm font-medium mb-1">📒 経費仕訳シミュレーター</p>
+        <p className="text-pink-600 dark:text-pink-400 text-sm font-medium mb-1">📒 経費仕訳シミュレーター</p>
         <h1 className="text-2xl md:text-3xl font-bold mb-2">
           経費の勘定科目を判定
         </h1>
-        <p className="text-sm text-zinc-600 leading-relaxed">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
           支出の名称（例: コミケ参加費、ねこのしっぽ、BOOTH手数料）を入力すると、
           適切な勘定科目を提案します。
         </p>
       </header>
 
-      <div className="bg-white border border-zinc-200 rounded-2xl p-5 mb-6">
-        <label className="block text-sm font-medium text-zinc-700 mb-2">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 mb-6">
+        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
           支出の名称・キーワード
         </label>
         <input
@@ -42,10 +42,10 @@ export default function ShiwakePage() {
             setSelectedId(null);
           }}
           placeholder="例: ねこのしっぽ、コミケ参加費、BOOTH手数料、新幹線代"
-          className="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400"
+          className="w-full px-4 py-2.5 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400"
         />
 
-        <label className="block text-sm font-medium text-zinc-700 mt-4 mb-2">
+        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mt-4 mb-2">
           金額（円・任意）
         </label>
         <input
@@ -53,13 +53,13 @@ export default function ShiwakePage() {
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="例: 8000"
-          className="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400"
+          className="w-full px-4 py-2.5 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400"
         />
       </div>
 
       {query && suggestions.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-sm font-medium text-zinc-700 mb-2">
+          <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
             候補（クリックで選択）
           </h2>
           <div className="grid gap-2">
@@ -69,12 +69,12 @@ export default function ShiwakePage() {
                 onClick={() => setSelectedId(s.id)}
                 className={`text-left p-3 border-2 rounded-lg transition-all ${
                   selected?.id === s.id
-                    ? "border-pink-400 bg-pink-50"
-                    : "border-zinc-200 bg-white hover:border-pink-300"
+                    ? "border-pink-400 bg-pink-50 dark:bg-pink-950/40 dark:border-pink-600"
+                    : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-pink-300 dark:hover:border-pink-700"
                 }`}
               >
                 <div className="font-medium text-sm">{s.label}</div>
-                <div className="text-xs text-zinc-500 mt-0.5">→ {s.account}</div>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">→ {s.account}</div>
               </button>
             ))}
           </div>
@@ -82,27 +82,27 @@ export default function ShiwakePage() {
       )}
 
       {query && suggestions.length === 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm text-amber-900">
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6 text-sm text-amber-900 dark:text-amber-200">
           一致する候補が見つかりませんでした。下の一覧から手動で選択するか、別のキーワードでお試しください。
         </div>
       )}
 
       {selected && (
-        <div className="bg-white border-2 border-pink-300 rounded-2xl p-6 mb-6 shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 border-2 border-pink-300 dark:border-pink-700 rounded-2xl p-6 mb-6 shadow-sm">
           <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
             <h2 className="text-xl font-bold">{selected.label}</h2>
-            <span className="text-sm text-zinc-500">提案勘定科目</span>
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">提案勘定科目</span>
           </div>
-          <div className="text-2xl font-bold text-pink-600 mb-4">
+          <div className="text-2xl font-bold text-pink-600 dark:text-pink-400 mb-4">
             {selected.account}
           </div>
-          <p className="text-sm text-zinc-700 leading-relaxed mb-4">
+          <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed mb-4">
             {selected.description}
           </p>
 
           {amount && Number(amount) > 0 && (
-            <div className="bg-zinc-50 rounded-lg p-3 mb-4">
-              <div className="text-xs text-zinc-500 mb-1">仕訳イメージ</div>
+            <div className="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3 mb-4">
+              <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">仕訳イメージ</div>
               <div className="font-mono text-sm">
                 <div className="flex justify-between">
                   <span>（借方）{selected.account}</span>
@@ -116,19 +116,19 @@ export default function ShiwakePage() {
             </div>
           )}
 
-          <div className="text-xs text-zinc-600 mb-3">
+          <div className="text-xs text-zinc-600 dark:text-zinc-400 mb-3">
             <strong>例:</strong> {selected.examples.join(" / ")}
           </div>
 
           {selected.caution && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900">
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-xs text-amber-900 dark:text-amber-200">
               ⚠️ <strong>注意:</strong> {selected.caution}
             </div>
           )}
         </div>
       )}
 
-      <details className="bg-white border border-zinc-200 rounded-2xl p-5 mb-6">
+      <details className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 mb-6">
         <summary className="cursor-pointer font-medium text-sm">
           すべての勘定科目を一覧表示（{EXPENSE_CATEGORIES.length}件）
         </summary>
@@ -140,16 +140,16 @@ export default function ShiwakePage() {
                 setSelectedId(c.id);
                 setQuery(c.label);
               }}
-              className="text-left p-3 border border-zinc-200 rounded-lg hover:border-pink-300 hover:bg-pink-50 transition-colors"
+              className="text-left p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:border-pink-300 dark:hover:border-pink-700 hover:bg-pink-50 dark:hover:bg-pink-950/30 transition-colors"
             >
               <div className="font-medium text-sm">{c.label}</div>
-              <div className="text-xs text-zinc-500">→ {c.account}</div>
+              <div className="text-xs text-zinc-500 dark:text-zinc-400">→ {c.account}</div>
             </button>
           ))}
         </div>
       </details>
 
-      <p className="text-xs text-zinc-500">
+      <p className="text-xs text-zinc-500 dark:text-zinc-400">
         ※ 表示される勘定科目は一般的な例です。最終的な仕訳は事業形態や帳簿の運用方針により異なる場合があります。
       </p>
     </div>
